@@ -4,9 +4,13 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using StoneCo.Utils.IO.Exceptions;
 
 namespace StoneCo.Utils.IO
 {
+    /// <summary>
+    /// A Stream to read and write json documents.
+    /// </summary>
     public class JsonStream : IJsonStream, IDisposable
     {
         #region Constants
@@ -140,6 +144,12 @@ namespace StoneCo.Utils.IO
             byte[] documentBytes = new byte[nextDocumentSize];
 
             int readBytes = await Stream.ReadAsync(documentBytes, 0, nextDocumentSize);
+
+            if(readBytes != DocumentSizeLengthInBytes)
+            {
+                throw new InvalidJsonDocumentException($"Cant't read all bytes of the json document at position {Position}.", this.Position);
+            }
+
             if(readBytes > 0)
             {
                 return documentBytes;
