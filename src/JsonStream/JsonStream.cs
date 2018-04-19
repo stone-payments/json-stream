@@ -14,7 +14,7 @@ namespace StoneCo.Utils.IO
         /// <summary>
         /// The default number of bytes to representing the size of the json document.
         /// </summary>
-        public const uint DEFAULT_DOCUMENT_SIZE_LENGTH = 8;
+        public const int DEFAULT_DOCUMENT_SIZE_LENGTH = 8;
 
         #endregion
 
@@ -32,7 +32,7 @@ namespace StoneCo.Utils.IO
         /// <summary>
         /// The number of bytes to representing the size of the json document.
         /// </summary>
-        public uint DocumentSizeLengthInBytes { get; set; }
+        public int DocumentSizeLengthInBytes { get; set; }
 
         /// <summary>
         /// The pointer position in the Stream.
@@ -47,7 +47,7 @@ namespace StoneCo.Utils.IO
         /// The constructor receiving a Stream.
         /// </summary>
         /// <param name="stream">The Stream.</param>
-        public JsonStream(Stream stream, uint documentSizeLengthInBytes = DEFAULT_DOCUMENT_SIZE_LENGTH)
+        public JsonStream(Stream stream, int documentSizeLengthInBytes = DEFAULT_DOCUMENT_SIZE_LENGTH)
         {
             #region Validations
 
@@ -65,30 +65,6 @@ namespace StoneCo.Utils.IO
 
             this.Stream = stream;
             this.DocumentSizeLengthInBytes = documentSizeLengthInBytes;            
-        }
-
-        /// <summary>
-        /// The constructor receiving a FileStream.
-        /// </summary>
-        /// <param name="fileStream">The FileStream.</param>
-        public JsonStream(FileStream fileStream, uint documentSizeLengthInBytes = DEFAULT_DOCUMENT_SIZE_LENGTH)
-        {
-            #region Validations
-
-            if (fileStream == null)
-            {
-                throw new ArgumentNullException(nameof(fileStream));
-            }
-
-            if (documentSizeLengthInBytes < 1)
-            {
-                throw new ArgumentOutOfRangeException(nameof(documentSizeLengthInBytes), "Please reserve at least one byte to represent the size of the document.");
-            }
-
-            #endregion
-
-            this.Stream = fileStream;
-            this.DocumentSizeLengthInBytes = documentSizeLengthInBytes;
         }
 
         #endregion
@@ -117,6 +93,32 @@ namespace StoneCo.Utils.IO
 
         #endregion
 
+        #region Protected Methods
+
+        /// <summary>
+        /// Returns the size in bytes of the next document or zero if the end of the stream was reached.
+        /// </summary>
+        /// <returns>The size in bytes of the next document or zero if the end of the stream was reached.</returns>
+        protected async Task<int> GetNextDocumentSizeAsync()
+        {
+            byte[] documentLengthDescriptor = new byte[DocumentSizeLengthInBytes];
+            int readBytes = await Stream.ReadAsync(documentLengthDescriptor, 0, DocumentSizeLengthInBytes);
+
+            int documentSize;
+            if(readBytes > 0)
+            {
+                documentSize = int.Parse(System.Text.Encoding.UTF8.GetString(documentLengthDescriptor));
+            }
+            else
+            {
+                documentSize = 0;
+            }
+
+            return documentSize;
+        }
+
+        #endregion
+
         #region Public methods
 
         /// <summary>
@@ -125,7 +127,7 @@ namespace StoneCo.Utils.IO
         /// <returns>The bytes of the document.</returns>
         public byte[] ReadBytes()
         {
-            throw new NotImplementedException();
+            return ReadBytesAsync().GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -134,7 +136,18 @@ namespace StoneCo.Utils.IO
         /// <returns>The bytes of the document.</returns>
         public async Task<byte[]> ReadBytesAsync()
         {
-            throw new NotImplementedException();
+            int nextDocumentSize = await GetNextDocumentSizeAsync();
+            byte[] documentBytes = new byte[nextDocumentSize];
+
+            int readBytes = await Stream.ReadAsync(documentBytes, 0, nextDocumentSize);
+            if(readBytes > 0)
+            {
+                return documentBytes;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         /// <summary>

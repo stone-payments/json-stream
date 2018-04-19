@@ -9,7 +9,11 @@ namespace StoneCo.Utils.IO.JsonStreamUnitTest
     [TestClass]
     public class JsonStreamTest
     {
+        #region Public properties
+
         public TestContext TestContext { get; set; }
+
+        #endregion
 
         #region Private methods
 
@@ -79,7 +83,7 @@ namespace StoneCo.Utils.IO.JsonStreamUnitTest
                 FileStream fileStream = null;
                 IJsonStream jsonStream = new JsonStream(fileStream);
             });
-            Assert.AreEqual("fileStream", exception.ParamName);
+            Assert.AreEqual("stream", exception.ParamName);
         }
 
         [TestMethod]

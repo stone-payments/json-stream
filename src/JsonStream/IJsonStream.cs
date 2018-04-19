@@ -3,13 +3,13 @@ using System.Threading.Tasks;
 
 namespace StoneCo.Utils.IO
 {
-    interface IJsonStream
+    public interface IJsonStream
     {
 
         /// <summary>
         /// The number of bytes to representing the size of the json document.
         /// </summary>
-        uint DocumentSizeLengthInBytes { get; set; }
+        int DocumentSizeLengthInBytes { get; set; }
 
         /// <summary>
         /// The pointer position in the Stream.
