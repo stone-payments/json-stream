@@ -126,21 +126,27 @@ namespace StoneCo.Utils.IO
         #region Public methods
 
         /// <summary>
-        /// Returns the bytes of the document and move to the next document.
+        /// Returns the bytes of the document or null if the end of the stream was reached and move to the next document.
         /// </summary>
-        /// <returns>The bytes of the document.</returns>
+        /// <returns>The bytes of the document or null if the end of the stream was reached.</returns>
         public byte[] ReadBytes()
         {
             return ReadBytesAsync().GetAwaiter().GetResult();
         }
 
         /// <summary>
-        /// Returns the bytes of the document and move to the next document.
+        /// Returns the bytes of the document or null if the end of the stream was reached and move to the next document.
         /// </summary>
-        /// <returns>The bytes of the document.</returns>
+        /// <returns>The bytes of the document or null if the end of the stream was reached.</returns>
         public async Task<byte[]> ReadBytesAsync()
         {
             int nextDocumentSize = await GetNextDocumentSizeAsync();
+
+            if(nextDocumentSize == 0)
+            {
+                return null;
+            }
+
             byte[] documentBytes = new byte[nextDocumentSize];
 
             int readBytes = await Stream.ReadAsync(documentBytes, 0, nextDocumentSize);
@@ -148,16 +154,9 @@ namespace StoneCo.Utils.IO
             if(readBytes != DocumentSizeLengthInBytes)
             {
                 throw new InvalidJsonDocumentException($"Cant't read all bytes of the json document at position {Position}.", this.Position);
-            }
-
-            if(readBytes > 0)
-            {
-                return documentBytes;
-            }
-            else
-            {
-                return null;
-            }
+            }            
+            
+            return documentBytes;            
         }
 
         /// <summary>
