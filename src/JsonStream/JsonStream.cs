@@ -34,6 +34,11 @@ namespace StoneCo.Utils.IO
         /// </summary>
         public uint DocumentSizeLengthInBytes { get; set; }
 
+        /// <summary>
+        /// The pointer position in the Stream.
+        /// </summary>
+        public long Position { get { return this.Stream.Position; } }
+
         #endregion
 
         #region Constructors
@@ -59,7 +64,7 @@ namespace StoneCo.Utils.IO
             #endregion
 
             this.Stream = stream;
-            this.DocumentSizeLengthInBytes = documentSizeLengthInBytes;
+            this.DocumentSizeLengthInBytes = documentSizeLengthInBytes;            
         }
 
         /// <summary>
