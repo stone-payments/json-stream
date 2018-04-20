@@ -2,14 +2,20 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>JsonFileStream</AssemblyName>
+    <AssemblyName>JsonStream</AssemblyName>
     <RootNamespace>StoneCo.Utils.IO</RootNamespace>
-    <PackageId>StoneCo.JsonFileStream</PackageId>
+    <PackageId>StoneCo.JsonStream</PackageId>
     <Authors>Marcus Leandro &lt;mleandro@stone.com.br&gt;</Authors>
     <Company>StoneCo</Company>
-    <Description>A file stream to make easy read and write json documents in file.</Description>
+    <Description>A stream to make easy read and write json documents in file.</Description>
     <Copyright>StoneCo</Copyright>
     <DebugType>Full</DebugType>
+    <PackageLicenseUrl>https://github.com/stone-payments/json-stream/blob/production/license/README.md</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/stone-payments/json-stream</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/stone-payments/json-stream.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>json, stream, jsonstream, filestream</PackageTags>
+    <PackageReleaseNotes>First release.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
