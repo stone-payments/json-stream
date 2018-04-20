@@ -108,16 +108,25 @@ namespace StoneCo.Utils.IO
             byte[] documentLengthDescriptor = new byte[DocumentSizeLengthInBytes];
             int readBytes = await Stream.ReadAsync(documentLengthDescriptor, 0, DocumentSizeLengthInBytes);
 
-            int documentSize;
-            if(readBytes > 0)
+            if(readBytes == 0)
             {
-                documentSize = int.Parse(System.Text.Encoding.UTF8.GetString(documentLengthDescriptor));
-            }
-            else
-            {
-                documentSize = 0;
+                return readBytes;
             }
 
+            int documentSize;
+            if(readBytes != this.DocumentSizeLengthInBytes)
+            {
+                throw new InvalidDocumentSizeLengthException(DocumentSizeLengthInBytes, readBytes);                
+            }
+
+            try
+            {
+                documentSize = int.Parse(System.Text.Encoding.UTF8.GetString(documentLengthDescriptor));
+            }catch(Exception ex)
+            {
+                throw new InvalidDocumentSizeLengthException("Error interpreting document size.", ex);
+            }
+            
             return documentSize;
         }
 
