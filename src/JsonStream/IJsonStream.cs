@@ -1,9 +1,10 @@
 ﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Threading.Tasks;
 
 namespace StoneCo.Utils.IO
 {
-    public interface IJsonStream
+    public interface IJsonStream : IDisposable
     {
 
         /// <summary>
@@ -44,7 +45,7 @@ namespace StoneCo.Utils.IO
         /// Returns a JObject and move to the next document.
         /// </summary>
         /// <returns>The JObject.</returns>
-        JObject ReadJson();
+        JObject ReadJObject();
 
         /// <summary>
         /// Returns a JObject and move to the next document.
@@ -107,42 +108,6 @@ namespace StoneCo.Utils.IO
         /// <summary>
         /// Writes a document and move the pointer to the end of file.
         /// </summary>
-        /// <param name="jArray">The JArray to write.</param>
-        void WriteJArray(JArray jArray);
-
-        /// <summary>
-        /// Writes a document and move the pointer to the end of file.
-        /// </summary>
-        /// <param name="jArray">The JArray to write.</param>
-        Task WriteJArrayAsync(JArray jArray);
-
-        /// <summary>
-        /// Writes a document and move the pointer to the end of file.
-        /// </summary>
-        /// <param name="jObject">The JObject to write.</param>
-        void WriteJson(JObject jObject);
-
-        /// <summary>
-        /// Writes a document and move the pointer to the end of file.
-        /// </summary>
-        /// <param name="jObject">The JObject to write.</param>
-        Task WriteJsonAsync(JObject jObject);
-
-        /// <summary>
-        /// Writes a document and move the pointer to the end of file.
-        /// </summary>
-        /// <param name="jToken">The JToken to write.</param>
-        void WriteJToken(JToken jToken);
-
-        /// <summary>
-        /// Writes a document and move the pointer to the end of file.
-        /// </summary>
-        /// <param name="jToken">The JToken to write.</param>
-        Task WriteJTokenAsync(JToken jToken);
-
-        /// <summary>
-        /// Writes a document and move the pointer to the end of file.
-        /// </summary>
         /// <param name="jString">The string of the document.</param>
         /// <param name="validate">Throws an exception if the bytes is not a valid Json document.</param>
         void WriteString(string jString, bool validate = true);
@@ -157,15 +122,13 @@ namespace StoneCo.Utils.IO
         /// <summary>
         /// Writes a document and move the pointer to the end of file.
         /// </summary>
-        /// <typeparam name="T">The instance type.</typeparam>
-        /// <param name="instance">The instance of T to write.</param>
-        void WriteObject<T>(T instance);
+        /// <param name="instance">The instance to write.</param>
+        void WriteObject(object instance);
 
         /// <summary>
         /// Writes a document and move the pointer to the end of file.
         /// </summary>
-        /// <typeparam name="T">The instance type.</typeparam>
-        /// <param name="instance">The instance of T to write.</param>
-        Task WriteObjectAsync<T>(T instance);
+        /// <param name="instance">The instance to write.</param>
+        Task WriteObjectAsync(object instance);
     }
 }

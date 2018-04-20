@@ -53,6 +53,47 @@ namespace StoneCo.Utils.IO.JsonStreamUnitTest
         }
         #endregion
 
+        #region Dispose
+
+        [TestMethod]
+        public void Dispose_true()
+        {
+            MemoryStream memoryStream = new MemoryStream();
+            JsonStreamMock jsonStream = new JsonStreamMock(memoryStream);
+            jsonStream.Dispose(true);
+            Assert.IsFalse(memoryStream.CanRead);
+            Assert.IsFalse(memoryStream.CanWrite);
+            Assert.IsFalse(memoryStream.CanSeek);
+        }
+
+        [TestMethod]
+        public void Dispose_true_twice()
+        {
+            MemoryStream memoryStream = new MemoryStream();
+            JsonStreamMock jsonStream = new JsonStreamMock(memoryStream);
+            jsonStream.Dispose(true);
+            Assert.IsFalse(memoryStream.CanRead);
+            Assert.IsFalse(memoryStream.CanWrite);
+            Assert.IsFalse(memoryStream.CanSeek);
+            jsonStream.Dispose(true);
+            Assert.IsFalse(memoryStream.CanRead);
+            Assert.IsFalse(memoryStream.CanWrite);
+            Assert.IsFalse(memoryStream.CanSeek);
+        }
+
+        [TestMethod]
+        public void Dispose_false()
+        {
+            MemoryStream memoryStream = new MemoryStream();
+            JsonStreamMock jsonStream = new JsonStreamMock(memoryStream);
+            jsonStream.Dispose(false);
+            Assert.IsTrue(memoryStream.CanRead);
+            Assert.IsTrue(memoryStream.CanWrite);
+            Assert.IsTrue(memoryStream.CanSeek);
+        }
+
+        #endregion
+
         #region Constructors
 
         [TestMethod]
@@ -114,12 +155,15 @@ namespace StoneCo.Utils.IO.JsonStreamUnitTest
             stream.Write(Encoding.UTF8.GetBytes("00001024"),0,8);
             stream.Position = 0;
 
-            JsonStreamMock jsonStream = new JsonStreamMock(stream);
-            int size = jsonStream.GetNextDocumentSize();
-            long position = stream.Position;
+            using (JsonStreamMock jsonStream = new JsonStreamMock(stream))
+            {
+                int size = jsonStream.GetNextDocumentSize();
+                long position = stream.Position;
 
-            Assert.AreEqual(1024, size);
-            Assert.AreEqual(jsonStream.DocumentSizeLengthInBytes, position);
+                Assert.AreEqual(1024, size);
+                Assert.AreEqual(jsonStream.DocumentSizeLengthInBytes, position);
+            }
+
         }
 
         [TestMethod]
@@ -129,12 +173,15 @@ namespace StoneCo.Utils.IO.JsonStreamUnitTest
             stream.Write(Encoding.UTF8.GetBytes("00001024"), 0, 8);
             stream.Position = stream.Length;
 
-            JsonStreamMock jsonStream = new JsonStreamMock(stream);
-            int size = jsonStream.GetNextDocumentSize();
-            long position = stream.Position;
+            using (JsonStreamMock jsonStream = new JsonStreamMock(stream))
+            {
+                int size = jsonStream.GetNextDocumentSize();
+                long position = stream.Position;
 
-            Assert.AreEqual(0, size);
-            Assert.AreEqual(stream.Length, position);
+                Assert.AreEqual(0, size);
+                Assert.AreEqual(stream.Length, position);
+            }
+
         }
 
         [TestMethod]
@@ -144,16 +191,17 @@ namespace StoneCo.Utils.IO.JsonStreamUnitTest
             stream.Write(Encoding.UTF8.GetBytes("00001024"), 0, 8);
             stream.Position = 1;
 
-            JsonStreamMock jsonStream = new JsonStreamMock(stream);
-
-            InvalidDocumentSizeLengthException exception = Assert.ThrowsException<InvalidDocumentSizeLengthException>(()=>
+            using (JsonStreamMock jsonStream = new JsonStreamMock(stream))
             {
-                int size = jsonStream.GetNextDocumentSize();
-            });
+                InvalidDocumentSizeLengthException exception = Assert.ThrowsException<InvalidDocumentSizeLengthException>(() =>
+                {
+                    int size = jsonStream.GetNextDocumentSize();
+                });
 
-            Assert.AreEqual(jsonStream.DocumentSizeLengthInBytes, exception.ExpectedDocumentSizeLength);
-            Assert.AreNotEqual(exception.ReadDocumentSizeLength, exception.ExpectedDocumentSizeLength);
-            Assert.IsTrue(exception.ReadDocumentSizeLength < exception.ExpectedDocumentSizeLength);
+                Assert.AreEqual(jsonStream.DocumentSizeLengthInBytes, exception.ExpectedDocumentSizeLength);
+                Assert.AreNotEqual(exception.ReadDocumentSizeLength, exception.ExpectedDocumentSizeLength);
+                Assert.IsTrue(exception.ReadDocumentSizeLength < exception.ExpectedDocumentSizeLength);
+            }
         }
 
         [TestMethod]
@@ -163,12 +211,14 @@ namespace StoneCo.Utils.IO.JsonStreamUnitTest
             stream.Write(Encoding.UTF8.GetBytes("000001024"), 0, 9);
             stream.Position = 0;
 
-            JsonStreamMock jsonStream = new JsonStreamMock(stream, 9);
-            int size = jsonStream.GetNextDocumentSize();
-            long position = stream.Position;
+            using (JsonStreamMock jsonStream = new JsonStreamMock(stream, 9))
+            {
+                int size = jsonStream.GetNextDocumentSize();
+                long position = stream.Position;
 
-            Assert.AreEqual(1024, size);
-            Assert.AreEqual(jsonStream.DocumentSizeLengthInBytes, position);
+                Assert.AreEqual(1024, size);
+                Assert.AreEqual(jsonStream.DocumentSizeLengthInBytes, position);
+            }
         }
 
         [TestMethod]
@@ -178,12 +228,14 @@ namespace StoneCo.Utils.IO.JsonStreamUnitTest
             stream.Write(Encoding.UTF8.GetBytes("000001024"), 0, 9);
             stream.Position = stream.Length;
 
-            JsonStreamMock jsonStream = new JsonStreamMock(stream, 9);
-            int size = jsonStream.GetNextDocumentSize();
-            long position = stream.Position;
+            using (JsonStreamMock jsonStream = new JsonStreamMock(stream, 9))
+            {
+                int size = jsonStream.GetNextDocumentSize();
+                long position = stream.Position;
 
-            Assert.AreEqual(0, size);
-            Assert.AreEqual(stream.Length, position);
+                Assert.AreEqual(0, size);
+                Assert.AreEqual(stream.Length, position);
+            }
         }
 
         [TestMethod]
@@ -193,16 +245,17 @@ namespace StoneCo.Utils.IO.JsonStreamUnitTest
             stream.Write(Encoding.UTF8.GetBytes("000001024"), 0, 9);
             stream.Position = 1;
 
-            JsonStreamMock jsonStream = new JsonStreamMock(stream, 9);
-
-            InvalidDocumentSizeLengthException exception = Assert.ThrowsException<InvalidDocumentSizeLengthException>(() =>
+            using (JsonStreamMock jsonStream = new JsonStreamMock(stream, 9))
             {
-                int size = jsonStream.GetNextDocumentSize();
-            });
+                InvalidDocumentSizeLengthException exception = Assert.ThrowsException<InvalidDocumentSizeLengthException>(() =>
+                {
+                    int size = jsonStream.GetNextDocumentSize();
+                });
 
-            Assert.AreEqual(jsonStream.DocumentSizeLengthInBytes, exception.ExpectedDocumentSizeLength);
-            Assert.AreNotEqual(exception.ReadDocumentSizeLength, exception.ExpectedDocumentSizeLength);
-            Assert.IsTrue(exception.ReadDocumentSizeLength < exception.ExpectedDocumentSizeLength);
+                Assert.AreEqual(jsonStream.DocumentSizeLengthInBytes, exception.ExpectedDocumentSizeLength);
+                Assert.AreNotEqual(exception.ReadDocumentSizeLength, exception.ExpectedDocumentSizeLength);
+                Assert.IsTrue(exception.ReadDocumentSizeLength < exception.ExpectedDocumentSizeLength);
+            }
         }
 
         [TestMethod]
@@ -212,16 +265,17 @@ namespace StoneCo.Utils.IO.JsonStreamUnitTest
             stream.Write(Encoding.UTF8.GetBytes("AsWedbUp"), 0, 8);
             stream.Position = 0;
 
-            JsonStreamMock jsonStream = new JsonStreamMock(stream, 8);
-
-            InvalidDocumentSizeLengthException exception = Assert.ThrowsException<InvalidDocumentSizeLengthException>(() =>
+            using (JsonStreamMock jsonStream = new JsonStreamMock(stream, 8))
             {
-                int size = jsonStream.GetNextDocumentSize();
-            });
+                InvalidDocumentSizeLengthException exception = Assert.ThrowsException<InvalidDocumentSizeLengthException>(() =>
+                {
+                    int size = jsonStream.GetNextDocumentSize();
+                });
 
-            Assert.AreEqual(default(int), exception.ExpectedDocumentSizeLength);
-            Assert.AreEqual(default(int), exception.ReadDocumentSizeLength);
-            Assert.AreEqual("Error interpreting document size.", exception.Message);
+                Assert.AreEqual(default(int), exception.ExpectedDocumentSizeLength);
+                Assert.AreEqual(default(int), exception.ReadDocumentSizeLength);
+                Assert.AreEqual("Error interpreting document size.", exception.Message);
+            }
         }
 
         #endregion
@@ -252,18 +306,20 @@ namespace StoneCo.Utils.IO.JsonStreamUnitTest
             stream.Write(jObjectBytes, 0, jObjectBytes.Length);
             stream.Position = 0;
 
-            IJsonStream jsonStream = new JsonStream(stream);
-            JObjectValidation readJObject = jsonStream.ReadJObject().ToObject<JObjectValidation>();
-            Assert.AreEqual(jObject.BooleanField, readJObject.BooleanField);
-            Assert.AreEqual(jObject.ByteField, readJObject.ByteField);
-            Assert.AreEqual(jObject.CharField, readJObject.CharField);
-            Assert.AreEqual(jObject.DateField, readJObject.DateField);
-            Assert.AreEqual(jObject.DoubleField, readJObject.DoubleField);
-            Assert.AreEqual(jObject.IntField, readJObject.IntField);
-            Assert.AreEqual(jObject.ListField.Length, readJObject.ListField.Length);
-            Assert.AreEqual(jObject.StringField, readJObject.StringField);
-            Assert.IsNotNull(readJObject.ObjectField);
-            Assert.IsNull(readJObject.NullField);
+            using (IJsonStream jsonStream = new JsonStream(stream))
+            {
+                JObjectValidation readJObject = jsonStream.ReadJObject().ToObject<JObjectValidation>();
+                Assert.AreEqual(jObject.BooleanField, readJObject.BooleanField);
+                Assert.AreEqual(jObject.ByteField, readJObject.ByteField);
+                Assert.AreEqual(jObject.CharField, readJObject.CharField);
+                Assert.AreEqual(jObject.DateField, readJObject.DateField);
+                Assert.AreEqual(jObject.DoubleField, readJObject.DoubleField);
+                Assert.AreEqual(jObject.IntField, readJObject.IntField);
+                Assert.AreEqual(jObject.ListField.Length, readJObject.ListField.Length);
+                Assert.AreEqual(jObject.StringField, readJObject.StringField);
+                Assert.IsNotNull(readJObject.ObjectField);
+                Assert.IsNull(readJObject.NullField);
+            }
         }
 
         #endregion
@@ -297,22 +353,24 @@ namespace StoneCo.Utils.IO.JsonStreamUnitTest
             stream.Write(jObjectBytes, 0, jObjectBytes.Length);
             stream.Position = 0;
 
-            IJsonStream jsonStream = new JsonStream(stream);
-            JArray readArray = jsonStream.ReadJArray();
-            Assert.AreEqual(1, readArray.Count);
+            using (IJsonStream jsonStream = new JsonStream(stream))
+            {
+                JArray readArray = jsonStream.ReadJArray();
+                Assert.AreEqual(1, readArray.Count);
 
-            JObjectValidation readJObject = readArray.First.ToObject<JObjectValidation>();
+                JObjectValidation readJObject = readArray.First.ToObject<JObjectValidation>();
 
-            Assert.AreEqual(jObject.BooleanField, readJObject.BooleanField);
-            Assert.AreEqual(jObject.ByteField, readJObject.ByteField);
-            Assert.AreEqual(jObject.CharField, readJObject.CharField);
-            Assert.AreEqual(jObject.DateField, readJObject.DateField);
-            Assert.AreEqual(jObject.DoubleField, readJObject.DoubleField);
-            Assert.AreEqual(jObject.IntField, readJObject.IntField);
-            Assert.AreEqual(jObject.ListField.Length, readJObject.ListField.Length);
-            Assert.AreEqual(jObject.StringField, readJObject.StringField);
-            Assert.IsNotNull(readJObject.ObjectField);
-            Assert.IsNull(readJObject.NullField);
+                Assert.AreEqual(jObject.BooleanField, readJObject.BooleanField);
+                Assert.AreEqual(jObject.ByteField, readJObject.ByteField);
+                Assert.AreEqual(jObject.CharField, readJObject.CharField);
+                Assert.AreEqual(jObject.DateField, readJObject.DateField);
+                Assert.AreEqual(jObject.DoubleField, readJObject.DoubleField);
+                Assert.AreEqual(jObject.IntField, readJObject.IntField);
+                Assert.AreEqual(jObject.ListField.Length, readJObject.ListField.Length);
+                Assert.AreEqual(jObject.StringField, readJObject.StringField);
+                Assert.IsNotNull(readJObject.ObjectField);
+                Assert.IsNull(readJObject.NullField);
+            }
         }
 
         #endregion
@@ -343,9 +401,11 @@ namespace StoneCo.Utils.IO.JsonStreamUnitTest
             stream.Write(jObjectBytes, 0, jObjectBytes.Length);
             stream.Position = stream.Length;
 
-            IJsonStream jsonStream = new JsonStream(stream);
-            JToken readJToken = jsonStream.ReadJToken();
-            Assert.IsNull(readJToken);
+            using (IJsonStream jsonStream = new JsonStream(stream))
+            {
+                JToken readJToken = jsonStream.ReadJToken();
+                Assert.IsNull(readJToken);
+            }
         }
 
         #endregion
@@ -376,14 +436,15 @@ namespace StoneCo.Utils.IO.JsonStreamUnitTest
             stream.Write(jObjectBytes, 0, jObjectBytes.Length);
             stream.Position = 0;
 
-            IJsonStream jsonStream = new JsonStream(stream);
-
-            InvalidJsonDocumentException ex = Assert.ThrowsException<InvalidJsonDocumentException>(()=>
+            using (IJsonStream jsonStream = new JsonStream(stream))
             {
-                JObjectValidation readObject = jsonStream.ReadObject<JObjectValidation>();
-            });
-            Assert.IsInstanceOfType(ex, typeof(InvalidJsonDocumentException));
-            Assert.IsTrue(ex.Message.Contains("Cant't read all bytes of the json document at position"));
+                InvalidJsonDocumentException ex = Assert.ThrowsException<InvalidJsonDocumentException>(() =>
+                {
+                    JObjectValidation readObject = jsonStream.ReadObject<JObjectValidation>();
+                });
+                Assert.IsInstanceOfType(ex, typeof(InvalidJsonDocumentException));
+                Assert.IsTrue(ex.Message.Contains("Cant't read all bytes of the json document at position"));
+            }
         }
 
         [TestMethod]
@@ -410,18 +471,20 @@ namespace StoneCo.Utils.IO.JsonStreamUnitTest
             stream.Write(jObjectBytes, 0, jObjectBytes.Length);
             stream.Position = 0;
 
-            IJsonStream jsonStream = new JsonStream(stream);
-            JObjectValidation readJObject = jsonStream.ReadObject<JObjectValidation>();
-            Assert.AreEqual(jObject.BooleanField, readJObject.BooleanField);
-            Assert.AreEqual(jObject.ByteField, readJObject.ByteField);
-            Assert.AreEqual(jObject.CharField, readJObject.CharField);
-            Assert.AreEqual(jObject.DateField, readJObject.DateField);
-            Assert.AreEqual(jObject.DoubleField, readJObject.DoubleField);
-            Assert.AreEqual(jObject.IntField, readJObject.IntField);
-            Assert.AreEqual(jObject.ListField.Length, readJObject.ListField.Length);
-            Assert.AreEqual(jObject.StringField, readJObject.StringField);
-            Assert.IsNotNull(readJObject.ObjectField);
-            Assert.IsNull(readJObject.NullField);
+            using (IJsonStream jsonStream = new JsonStream(stream))
+            {
+                JObjectValidation readJObject = jsonStream.ReadObject<JObjectValidation>();
+                Assert.AreEqual(jObject.BooleanField, readJObject.BooleanField);
+                Assert.AreEqual(jObject.ByteField, readJObject.ByteField);
+                Assert.AreEqual(jObject.CharField, readJObject.CharField);
+                Assert.AreEqual(jObject.DateField, readJObject.DateField);
+                Assert.AreEqual(jObject.DoubleField, readJObject.DoubleField);
+                Assert.AreEqual(jObject.IntField, readJObject.IntField);
+                Assert.AreEqual(jObject.ListField.Length, readJObject.ListField.Length);
+                Assert.AreEqual(jObject.StringField, readJObject.StringField);
+                Assert.IsNotNull(readJObject.ObjectField);
+                Assert.IsNull(readJObject.NullField);
+            }
         }
 
         #endregion
@@ -452,18 +515,20 @@ namespace StoneCo.Utils.IO.JsonStreamUnitTest
             stream.Write(jObjectBytes, 0, jObjectBytes.Length);
             stream.Position = 0;
 
-            IJsonStream jsonStream = new JsonStream(stream);
-            JObjectValidation readJObject = JsonConvert.DeserializeObject<JObjectValidation>(Encoding.UTF8.GetString(jsonStream.ReadBytes()));
-            Assert.AreEqual(jObject.BooleanField, readJObject.BooleanField);
-            Assert.AreEqual(jObject.ByteField, readJObject.ByteField);
-            Assert.AreEqual(jObject.CharField, readJObject.CharField);
-            Assert.AreEqual(jObject.DateField, readJObject.DateField);
-            Assert.AreEqual(jObject.DoubleField, readJObject.DoubleField);
-            Assert.AreEqual(jObject.IntField, readJObject.IntField);
-            Assert.AreEqual(jObject.ListField.Length, readJObject.ListField.Length);
-            Assert.AreEqual(jObject.StringField, readJObject.StringField);
-            Assert.IsNotNull(readJObject.ObjectField);
-            Assert.IsNull(readJObject.NullField);
+            using (IJsonStream jsonStream = new JsonStream(stream))
+            {
+                JObjectValidation readJObject = JsonConvert.DeserializeObject<JObjectValidation>(Encoding.UTF8.GetString(jsonStream.ReadBytes()));
+                Assert.AreEqual(jObject.BooleanField, readJObject.BooleanField);
+                Assert.AreEqual(jObject.ByteField, readJObject.ByteField);
+                Assert.AreEqual(jObject.CharField, readJObject.CharField);
+                Assert.AreEqual(jObject.DateField, readJObject.DateField);
+                Assert.AreEqual(jObject.DoubleField, readJObject.DoubleField);
+                Assert.AreEqual(jObject.IntField, readJObject.IntField);
+                Assert.AreEqual(jObject.ListField.Length, readJObject.ListField.Length);
+                Assert.AreEqual(jObject.StringField, readJObject.StringField);
+                Assert.IsNotNull(readJObject.ObjectField);
+                Assert.IsNull(readJObject.NullField);
+            }
         }
 
         #endregion
@@ -494,18 +559,189 @@ namespace StoneCo.Utils.IO.JsonStreamUnitTest
             stream.Write(jObjectBytes, 0, jObjectBytes.Length);
             stream.Position = 0;
 
-            IJsonStream jsonStream = new JsonStream(stream);
-            JObjectValidation readJObject = JsonConvert.DeserializeObject<JObjectValidation>(jsonStream.ReadString());
-            Assert.AreEqual(jObject.BooleanField, readJObject.BooleanField);
-            Assert.AreEqual(jObject.ByteField, readJObject.ByteField);
-            Assert.AreEqual(jObject.CharField, readJObject.CharField);
-            Assert.AreEqual(jObject.DateField, readJObject.DateField);
-            Assert.AreEqual(jObject.DoubleField, readJObject.DoubleField);
-            Assert.AreEqual(jObject.IntField, readJObject.IntField);
-            Assert.AreEqual(jObject.ListField.Length, readJObject.ListField.Length);
-            Assert.AreEqual(jObject.StringField, readJObject.StringField);
-            Assert.IsNotNull(readJObject.ObjectField);
-            Assert.IsNull(readJObject.NullField);
+            using (IJsonStream jsonStream = new JsonStream(stream))
+            {
+                JObjectValidation readJObject = JsonConvert.DeserializeObject<JObjectValidation>(jsonStream.ReadString());
+                Assert.AreEqual(jObject.BooleanField, readJObject.BooleanField);
+                Assert.AreEqual(jObject.ByteField, readJObject.ByteField);
+                Assert.AreEqual(jObject.CharField, readJObject.CharField);
+                Assert.AreEqual(jObject.DateField, readJObject.DateField);
+                Assert.AreEqual(jObject.DoubleField, readJObject.DoubleField);
+                Assert.AreEqual(jObject.IntField, readJObject.IntField);
+                Assert.AreEqual(jObject.ListField.Length, readJObject.ListField.Length);
+                Assert.AreEqual(jObject.StringField, readJObject.StringField);
+                Assert.IsNotNull(readJObject.ObjectField);
+                Assert.IsNull(readJObject.NullField);
+            }
+        }
+
+        #endregion
+
+        #region WriteObject
+
+        [TestMethod]
+        public void WriteObject_pass()
+        {
+            Stream stream = new MemoryStream();
+            using(IJsonStream jsonStream = new JsonStream(stream))
+            {
+                JObjectValidation jObject = new JObjectValidation
+                {
+                    BooleanField = true,
+                    ByteField = 1,
+                    CharField = 'a',
+                    DateField = "2016-08-24T18:30:32.2387069+00:00",
+                    DoubleField = 10.5,
+                    IntField = 10,
+                    ListField = new object[2] { new { }, new { } },
+                    ObjectField = new { },
+                    StringField = "string",
+                    NullField = null
+                };
+
+                jsonStream.WriteObject(jObject);
+                stream.Position = 0;
+                JObjectValidation readJObject = jsonStream.ReadObject<JObjectValidation>();
+                Assert.AreEqual(jObject.BooleanField, readJObject.BooleanField);
+                Assert.AreEqual(jObject.ByteField, readJObject.ByteField);
+                Assert.AreEqual(jObject.CharField, readJObject.CharField);
+                Assert.AreEqual(jObject.DateField, readJObject.DateField);
+                Assert.AreEqual(jObject.DoubleField, readJObject.DoubleField);
+                Assert.AreEqual(jObject.IntField, readJObject.IntField);
+                Assert.AreEqual(jObject.ListField.Length, readJObject.ListField.Length);
+                Assert.AreEqual(jObject.StringField, readJObject.StringField);
+                Assert.IsNotNull(readJObject.ObjectField);
+                Assert.IsNull(readJObject.NullField);
+            }
+        }
+
+        #endregion
+
+        #region WriteString
+
+        [TestMethod]
+        public void WriteString_pass()
+        {
+            Stream stream = new MemoryStream();
+            using (IJsonStream jsonStream = new JsonStream(stream))
+            {
+                JObjectValidation jObject = new JObjectValidation
+                {
+                    BooleanField = true,
+                    ByteField = 1,
+                    CharField = 'a',
+                    DateField = "2016-08-24T18:30:32.2387069+00:00",
+                    DoubleField = 10.5,
+                    IntField = 10,
+                    ListField = new object[2] { new { }, new { } },
+                    ObjectField = new { },
+                    StringField = "string",
+                    NullField = null
+                };
+                string jObjectSerialized = JsonConvert.SerializeObject(jObject);
+                jsonStream.WriteString(jObjectSerialized);
+                stream.Position = 0;
+                JObjectValidation readJObject = jsonStream.ReadObject<JObjectValidation>();
+                Assert.AreEqual(jObject.BooleanField, readJObject.BooleanField);
+                Assert.AreEqual(jObject.ByteField, readJObject.ByteField);
+                Assert.AreEqual(jObject.CharField, readJObject.CharField);
+                Assert.AreEqual(jObject.DateField, readJObject.DateField);
+                Assert.AreEqual(jObject.DoubleField, readJObject.DoubleField);
+                Assert.AreEqual(jObject.IntField, readJObject.IntField);
+                Assert.AreEqual(jObject.ListField.Length, readJObject.ListField.Length);
+                Assert.AreEqual(jObject.StringField, readJObject.StringField);
+                Assert.IsNotNull(readJObject.ObjectField);
+                Assert.IsNull(readJObject.NullField);
+            }
+        }
+
+        #endregion
+
+        #region WriteBytes
+
+        [TestMethod]
+        public void WriteBytes_when_bytes_length_is_zero()
+        {
+            Stream stream = new MemoryStream();
+            using (IJsonStream jsonStream = new JsonStream(stream))
+            {
+                byte[] bytes = new byte[0];
+                jsonStream.WriteBytes(bytes, false);
+
+                Assert.AreEqual(0, stream.Length);
+            }
+        }
+
+        [TestMethod]
+        public void WriteBytes_when_bytes_is_null()
+        {
+            Stream stream = new MemoryStream();
+            using (IJsonStream jsonStream = new JsonStream(stream))
+            {
+                byte[] bytes = null;
+
+                ArgumentNullException ex = Assert.ThrowsException<ArgumentNullException>(()=>
+                {
+                    jsonStream.WriteBytes(bytes, false);
+                });
+                Assert.AreEqual("bytes", ex.ParamName);
+                Assert.AreEqual(0, stream.Length);
+            }
+        }
+
+        [TestMethod]
+        public void WriteBytes_when_validate_is_true_pass()
+        {
+            Stream stream = new MemoryStream();
+            using (IJsonStream jsonStream = new JsonStream(stream))
+            {
+                JObjectValidation jObject = new JObjectValidation
+                {
+                    BooleanField = true,
+                    ByteField = 1,
+                    CharField = 'a',
+                    DateField = "2016-08-24T18:30:32.2387069+00:00",
+                    DoubleField = 10.5,
+                    IntField = 10,
+                    ListField = new object[2] { new { }, new { } },
+                    ObjectField = new { },
+                    StringField = "string",
+                    NullField = null
+                };
+
+                byte[] bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(jObject));
+
+                jsonStream.WriteBytes(bytes, true);
+                stream.Position = 0;
+                JObjectValidation readJObject = jsonStream.ReadObject<JObjectValidation>();
+                Assert.AreEqual(jObject.BooleanField, readJObject.BooleanField);
+                Assert.AreEqual(jObject.ByteField, readJObject.ByteField);
+                Assert.AreEqual(jObject.CharField, readJObject.CharField);
+                Assert.AreEqual(jObject.DateField, readJObject.DateField);
+                Assert.AreEqual(jObject.DoubleField, readJObject.DoubleField);
+                Assert.AreEqual(jObject.IntField, readJObject.IntField);
+                Assert.AreEqual(jObject.ListField.Length, readJObject.ListField.Length);
+                Assert.AreEqual(jObject.StringField, readJObject.StringField);
+                Assert.IsNotNull(readJObject.ObjectField);
+                Assert.IsNull(readJObject.NullField);
+            }
+        }
+
+        [TestMethod]
+        public void WriteBytes_when_validate_is_true_not_passing()
+        {
+            Stream stream = new MemoryStream();
+            using (IJsonStream jsonStream = new JsonStream(stream))
+            {
+                byte[] bytes = Encoding.UTF8.GetBytes("NOT PASS");
+
+                JsonReaderException ex = Assert.ThrowsException<JsonReaderException>(() =>
+                {
+                    jsonStream.WriteBytes(bytes, true);
+                });
+                Assert.IsInstanceOfType(ex, typeof(JsonReaderException));
+                Assert.AreEqual(0, stream.Length);
+            }
         }
 
         #endregion

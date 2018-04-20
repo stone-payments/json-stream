@@ -5,7 +5,7 @@ SET opencover="C:\Users\mleandro\AppData\Local\Apps\OpenCover\OpenCover.Console.
 SET reportgenerator="C:\Program Files (x86)\ReportGenerator\ReportGenerator.exe"
 
 SET targetargs="test"  
-SET filter="+[*]StoneCo.Utils.* -[*.Test]* -[xunit.*]* -[FluentValidation]*"  
+SET filter="+[*]StoneCo.Utils.* -[*.*Test]* -[xunit.*]* -[FluentValidation]*"  
 SET coveragefile=Coverage.xml  
 SET coveragedir=Coverage
 

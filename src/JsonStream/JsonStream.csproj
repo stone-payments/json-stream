@@ -9,6 +9,7 @@
     <Company>StoneCo</Company>
     <Description>A file stream to make easy read and write json documents in file.</Description>
     <Copyright>StoneCo</Copyright>
+    <DebugType>Full</DebugType>
   </PropertyGroup>
 
   <ItemGroup>

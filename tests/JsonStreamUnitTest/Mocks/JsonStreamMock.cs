@@ -15,5 +15,10 @@ namespace StoneCo.Utils.IO.JsonStreamUnitTest.Mocks
         {
             return base.GetNextDocumentSizeAsync().GetAwaiter().GetResult();
         }
+
+        public new void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+        }
     }
 }

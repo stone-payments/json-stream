@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using StoneCo.Utils.IO.Exceptions;
 
@@ -11,7 +12,7 @@ namespace StoneCo.Utils.IO
     /// <summary>
     /// A Stream to read and write json documents.
     /// </summary>
-    public class JsonStream : IJsonStream, IDisposable
+    public class JsonStream : IJsonStream
     {
         #region Constants
 
@@ -68,14 +69,21 @@ namespace StoneCo.Utils.IO
             #endregion
 
             this.Stream = stream;
-            this.DocumentSizeLengthInBytes = documentSizeLengthInBytes;            
+            this.DocumentSizeLengthInBytes = documentSizeLengthInBytes;
+
+            JsonConvert.DefaultSettings = () => Serialization.Settings;
         }
 
         #endregion
 
         #region IDisposable Support
+
         private bool disposedValue = false; // To detect redundant calls
 
+        /// <summary>
+        /// Dispose pattern.
+        /// </summary>
+        /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -89,7 +97,9 @@ namespace StoneCo.Utils.IO
             }
         }
 
-        // This code added to correctly implement the disposable pattern.
+        /// <summary>
+        /// Dispose pattern.
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);
@@ -160,7 +170,7 @@ namespace StoneCo.Utils.IO
 
             int readBytes = await Stream.ReadAsync(documentBytes, 0, nextDocumentSize);
 
-            if(readBytes != DocumentSizeLengthInBytes)
+            if(readBytes != nextDocumentSize)
             {
                 throw new InvalidJsonDocumentException($"Cant't read all bytes of the json document at position {Position}.", this.Position);
             }            
@@ -174,7 +184,7 @@ namespace StoneCo.Utils.IO
         /// <returns>The JArray.</returns>
         public JArray ReadJArray()
         {
-            throw new NotImplementedException();
+            return ReadJArrayAsync().GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -183,16 +193,16 @@ namespace StoneCo.Utils.IO
         /// <returns>The JArray.</returns>
         public async Task<JArray> ReadJArrayAsync()
         {
-            throw new NotImplementedException();
+            return await ReadObjectAsync<JArray>();
         }
 
         /// <summary>
         /// Returns a JObject and move to the next document.
         /// </summary>
         /// <returns>The JObject.</returns>
-        public JObject ReadJson()
+        public JObject ReadJObject()
         {
-            throw new NotImplementedException();
+            return ReadJsonAsync().GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -201,7 +211,7 @@ namespace StoneCo.Utils.IO
         /// <returns>The JObject.</returns>
         public async Task<JObject> ReadJsonAsync()
         {
-            throw new NotImplementedException();
+            return await ReadObjectAsync<JObject>();
         }
 
         /// <summary>
@@ -210,7 +220,7 @@ namespace StoneCo.Utils.IO
         /// <returns>The JToken.</returns>
         public JToken ReadJToken()
         {
-            throw new NotImplementedException();
+            return ReadJTokenAsync().GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -219,7 +229,7 @@ namespace StoneCo.Utils.IO
         /// <returns>The JToken.</returns>
         public async Task<JToken> ReadJTokenAsync()
         {
-            throw new NotImplementedException();
+            return await ReadObjectAsync<JToken>();
         }
 
         /// <summary>
@@ -229,7 +239,7 @@ namespace StoneCo.Utils.IO
         /// <returns>The T instance.</returns>
         public T ReadObject<T>()
         {
-            throw new NotImplementedException();
+            return ReadObjectAsync<T>().GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -239,7 +249,12 @@ namespace StoneCo.Utils.IO
         /// <returns>The T instance.</returns>
         public async Task<T> ReadObjectAsync<T>()
         {
-            throw new NotImplementedException();
+            string strJson = await ReadStringAsync();
+            if(strJson == null)
+            {
+                return default(T);
+            }
+            return JsonConvert.DeserializeObject<T>(strJson);
         }
 
         /// <summary>
@@ -248,7 +263,7 @@ namespace StoneCo.Utils.IO
         /// <returns>The string of the document.</returns>
         public string ReadString()
         {
-            throw new NotImplementedException();
+            return ReadStringAsync().GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -257,7 +272,12 @@ namespace StoneCo.Utils.IO
         /// <returns>The string of the document.</returns>
         public async Task<string> ReadStringAsync()
         {
-            throw new NotImplementedException();
+            byte[] readBytes = await ReadBytesAsync();
+            if(readBytes == null)
+            {
+                return null;
+            }
+            return Encoding.UTF8.GetString(readBytes);
         }
 
         /// <summary>
@@ -267,7 +287,7 @@ namespace StoneCo.Utils.IO
         /// <param name="validate">Throws an exception if the bytes is not a valid Json document.</param>
         public void WriteBytes(byte[] bytes, bool validate = true)
         {
-            throw new NotImplementedException();
+            this.WriteBytesAsync(bytes, validate).GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -277,62 +297,27 @@ namespace StoneCo.Utils.IO
         /// <param name="validate">Throws an exception if the bytes is not a valid Json document.</param>
         public async Task WriteBytesAsync(byte[] bytes, bool validate = true)
         {
-            throw new NotImplementedException();
+            if(bytes == null)
+            {
+                throw new ArgumentNullException(nameof(bytes));
+            }
+
+            int size = bytes.Length;
+            if (size == 0)
+            {
+                return;
+            }
+
+            if (validate)
+            {
+                JsonConvert.DeserializeObject(Encoding.UTF8.GetString(bytes));
+            }
+
+            byte[] lenghDescriptor = Encoding.UTF8.GetBytes(bytes.Length.ToString().PadLeft(DocumentSizeLengthInBytes));
+            await Stream.WriteAsync(lenghDescriptor, 0, DocumentSizeLengthInBytes);
+            await Stream.WriteAsync(bytes, 0, size);            
         }
 
-        /// <summary>
-        /// Writes a document and move the pointer to the end of file.
-        /// </summary>
-        /// <param name="jArray">The JArray to write.</param>
-        public void WriteJArray(JArray jArray)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Writes a document and move the pointer to the end of file.
-        /// </summary>
-        /// <param name="jArray">The JArray to write.</param>
-        public async Task WriteJArrayAsync(JArray jArray)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Writes a document and move the pointer to the end of file.
-        /// </summary>
-        /// <param name="jObject">The JObject to write.</param>
-        public void WriteJson(JObject jObject)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Writes a document and move the pointer to the end of file.
-        /// </summary>
-        /// <param name="jObject">The JObject to write.</param>
-        public async Task WriteJsonAsync(JObject jObject)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Writes a document and move the pointer to the end of file.
-        /// </summary>
-        /// <param name="jToken">The JToken to write.</param>
-        public void WriteJToken(JToken jToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Writes a document and move the pointer to the end of file.
-        /// </summary>
-        /// <param name="jToken">The JToken to write.</param>
-        public async Task WriteJTokenAsync(JToken jToken)
-        {
-            throw new NotImplementedException();
-        }
 
         /// <summary>
         /// Writes a document and move the pointer to the end of file.
@@ -341,7 +326,8 @@ namespace StoneCo.Utils.IO
         /// <param name="validate">Throws an exception if the bytes is not a valid Json document.</param>
         public void WriteString(string jString, bool validate = true)
         {
-            throw new NotImplementedException();
+            byte[] bytes = Encoding.UTF8.GetBytes(jString);
+            WriteBytes(bytes, validate);
         }
 
         /// <summary>
@@ -351,7 +337,8 @@ namespace StoneCo.Utils.IO
         /// <param name="validate">Throws an exception if the bytes is not a valid Json document.</param>
         public async Task WriteStringAsync(string jString, bool validate = true)
         {
-            throw new NotImplementedException();
+            byte[] bytes = Encoding.UTF8.GetBytes(jString);
+            await WriteBytesAsync(bytes, validate);
         }
 
         /// <summary>
@@ -359,9 +346,9 @@ namespace StoneCo.Utils.IO
         /// </summary>
         /// <typeparam name="T">The instance type.</typeparam>
         /// <param name="instance">The instance of T to write.</param>
-        public void WriteObject<T>(T instance)
+        public void WriteObject(object instance)
         {
-            throw new NotImplementedException();
+            WriteObjectAsync(instance).GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -369,9 +356,10 @@ namespace StoneCo.Utils.IO
         /// </summary>
         /// <typeparam name="T">The instance type.</typeparam>
         /// <param name="instance">The instance of T to write.</param>
-        public async Task WriteObjectAsync<T>(T instance)
+        public async Task WriteObjectAsync(object instance)
         {
-            throw new NotImplementedException();
+            string strObject = JsonConvert.SerializeObject(instance);
+            await WriteStringAsync(strObject, false);
         }
 
         #endregion
