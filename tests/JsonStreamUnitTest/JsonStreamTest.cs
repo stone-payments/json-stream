@@ -1,4 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using StoneCo.Utils.IO.Exceptions;
 using StoneCo.Utils.IO.JsonStreamUnitTest.Mocks;
 using System;
@@ -201,6 +203,309 @@ namespace StoneCo.Utils.IO.JsonStreamUnitTest
             Assert.AreEqual(jsonStream.DocumentSizeLengthInBytes, exception.ExpectedDocumentSizeLength);
             Assert.AreNotEqual(exception.ReadDocumentSizeLength, exception.ExpectedDocumentSizeLength);
             Assert.IsTrue(exception.ReadDocumentSizeLength < exception.ExpectedDocumentSizeLength);
+        }
+
+        [TestMethod]
+        public void GetNexDocumentSizeAsync_when_size_descriptor_is_invalid()
+        {
+            Stream stream = new MemoryStream();
+            stream.Write(Encoding.UTF8.GetBytes("AsWedbUp"), 0, 8);
+            stream.Position = 0;
+
+            JsonStreamMock jsonStream = new JsonStreamMock(stream, 8);
+
+            InvalidDocumentSizeLengthException exception = Assert.ThrowsException<InvalidDocumentSizeLengthException>(() =>
+            {
+                int size = jsonStream.GetNextDocumentSize();
+            });
+
+            Assert.AreEqual(default(int), exception.ExpectedDocumentSizeLength);
+            Assert.AreEqual(default(int), exception.ReadDocumentSizeLength);
+            Assert.AreEqual("Error interpreting document size.", exception.Message);
+        }
+
+        #endregion
+
+        #region ReadJObject
+
+        [TestMethod]
+        public void ReadJObject_pass()
+        {
+            JObjectValidation jObject = new JObjectValidation
+            {
+                BooleanField = true,
+                ByteField = 1,
+                CharField = 'a',
+                DateField = "2016-08-24T18:30:32.2387069+00:00",
+                DoubleField = 10.5,
+                IntField = 10,
+                ListField = new object[2] { new { }, new { } },
+                ObjectField = new { },
+                StringField = "string",
+                NullField = null
+            };
+            byte[] jObjectBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(jObject));
+            byte[] length = Encoding.UTF8.GetBytes(jObjectBytes.Length.ToString().PadLeft(8));
+
+            Stream stream = new MemoryStream();
+            stream.Write(length, 0, 8);
+            stream.Write(jObjectBytes, 0, jObjectBytes.Length);
+            stream.Position = 0;
+
+            IJsonStream jsonStream = new JsonStream(stream);
+            JObjectValidation readJObject = jsonStream.ReadJObject().ToObject<JObjectValidation>();
+            Assert.AreEqual(jObject.BooleanField, readJObject.BooleanField);
+            Assert.AreEqual(jObject.ByteField, readJObject.ByteField);
+            Assert.AreEqual(jObject.CharField, readJObject.CharField);
+            Assert.AreEqual(jObject.DateField, readJObject.DateField);
+            Assert.AreEqual(jObject.DoubleField, readJObject.DoubleField);
+            Assert.AreEqual(jObject.IntField, readJObject.IntField);
+            Assert.AreEqual(jObject.ListField.Length, readJObject.ListField.Length);
+            Assert.AreEqual(jObject.StringField, readJObject.StringField);
+            Assert.IsNotNull(readJObject.ObjectField);
+            Assert.IsNull(readJObject.NullField);
+        }
+
+        #endregion
+
+        #region ReadJArray
+
+        [TestMethod]
+        public void ReadJArray_pass()
+        {
+            JObjectValidation jObject = new JObjectValidation
+            {
+                BooleanField = true,
+                ByteField = 1,
+                CharField = 'a',
+                DateField = "2016-08-24T18:30:32.2387069+00:00",
+                DoubleField = 10.5,
+                IntField = 10,
+                ListField = new object[2] { new { }, new { } },
+                ObjectField = new { },
+                StringField = "string",
+                NullField = null
+            };
+
+            JObjectValidation[] list = new JObjectValidation[1] { jObject };
+
+            byte[] jObjectBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(list));
+            byte[] length = Encoding.UTF8.GetBytes(jObjectBytes.Length.ToString().PadLeft(8));
+
+            Stream stream = new MemoryStream();
+            stream.Write(length, 0, 8);
+            stream.Write(jObjectBytes, 0, jObjectBytes.Length);
+            stream.Position = 0;
+
+            IJsonStream jsonStream = new JsonStream(stream);
+            JArray readArray = jsonStream.ReadJArray();
+            Assert.AreEqual(1, readArray.Count);
+
+            JObjectValidation readJObject = readArray.First.ToObject<JObjectValidation>();
+
+            Assert.AreEqual(jObject.BooleanField, readJObject.BooleanField);
+            Assert.AreEqual(jObject.ByteField, readJObject.ByteField);
+            Assert.AreEqual(jObject.CharField, readJObject.CharField);
+            Assert.AreEqual(jObject.DateField, readJObject.DateField);
+            Assert.AreEqual(jObject.DoubleField, readJObject.DoubleField);
+            Assert.AreEqual(jObject.IntField, readJObject.IntField);
+            Assert.AreEqual(jObject.ListField.Length, readJObject.ListField.Length);
+            Assert.AreEqual(jObject.StringField, readJObject.StringField);
+            Assert.IsNotNull(readJObject.ObjectField);
+            Assert.IsNull(readJObject.NullField);
+        }
+
+        #endregion
+
+        #region ReadJToken
+
+        [TestMethod]
+        public void ReadJToken_is_end_of_stream()
+        {
+            JObjectValidation jObject = new JObjectValidation
+            {
+                BooleanField = true,
+                ByteField = 1,
+                CharField = 'a',
+                DateField = "2016-08-24T18:30:32.2387069+00:00",
+                DoubleField = 10.5,
+                IntField = 10,
+                ListField = new object[2] { new { }, new { } },
+                ObjectField = new { },
+                StringField = "string",
+                NullField = null
+            };
+            byte[] jObjectBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(jObject));
+            byte[] length = Encoding.UTF8.GetBytes(jObjectBytes.Length.ToString().PadLeft(8));
+
+            Stream stream = new MemoryStream();
+            stream.Write(length, 0, 8);
+            stream.Write(jObjectBytes, 0, jObjectBytes.Length);
+            stream.Position = stream.Length;
+
+            IJsonStream jsonStream = new JsonStream(stream);
+            JToken readJToken = jsonStream.ReadJToken();
+            Assert.IsNull(readJToken);
+        }
+
+        #endregion
+
+        #region ReadObject
+
+        [TestMethod]
+        public void ReadObject_cant_read_entire_document()
+        {
+            JObjectValidation jObject = new JObjectValidation
+            {
+                BooleanField = true,
+                ByteField = 1,
+                CharField = 'a',
+                DateField = "2016-08-24T18:30:32.2387069+00:00",
+                DoubleField = 10.5,
+                IntField = 10,
+                ListField = new object[2] { new { }, new { } },
+                ObjectField = new { },
+                StringField = "string",
+                NullField = null
+            };
+            byte[] jObjectBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(jObject));
+            byte[] length = Encoding.UTF8.GetBytes((jObjectBytes.Length + 1).ToString().PadLeft(8));
+
+            Stream stream = new MemoryStream();
+            stream.Write(length, 0, 8);
+            stream.Write(jObjectBytes, 0, jObjectBytes.Length);
+            stream.Position = 0;
+
+            IJsonStream jsonStream = new JsonStream(stream);
+
+            InvalidJsonDocumentException ex = Assert.ThrowsException<InvalidJsonDocumentException>(()=>
+            {
+                JObjectValidation readObject = jsonStream.ReadObject<JObjectValidation>();
+            });
+            Assert.IsInstanceOfType(ex, typeof(InvalidJsonDocumentException));
+            Assert.IsTrue(ex.Message.Contains("Cant't read all bytes of the json document at position"));
+        }
+
+        [TestMethod]
+        public void ReadObject_pass()
+        {
+            JObjectValidation jObject = new JObjectValidation
+            {
+                BooleanField = true,
+                ByteField = 1,
+                CharField = 'a',
+                DateField = "2016-08-24T18:30:32.2387069+00:00",
+                DoubleField = 10.5,
+                IntField = 10,
+                ListField = new object[2] { new { }, new { } },
+                ObjectField = new { },
+                StringField = "string",
+                NullField = null
+            };
+            byte[] jObjectBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(jObject));
+            byte[] length = Encoding.UTF8.GetBytes(jObjectBytes.Length.ToString().PadLeft(8));
+
+            Stream stream = new MemoryStream();
+            stream.Write(length, 0, 8);
+            stream.Write(jObjectBytes, 0, jObjectBytes.Length);
+            stream.Position = 0;
+
+            IJsonStream jsonStream = new JsonStream(stream);
+            JObjectValidation readJObject = jsonStream.ReadObject<JObjectValidation>();
+            Assert.AreEqual(jObject.BooleanField, readJObject.BooleanField);
+            Assert.AreEqual(jObject.ByteField, readJObject.ByteField);
+            Assert.AreEqual(jObject.CharField, readJObject.CharField);
+            Assert.AreEqual(jObject.DateField, readJObject.DateField);
+            Assert.AreEqual(jObject.DoubleField, readJObject.DoubleField);
+            Assert.AreEqual(jObject.IntField, readJObject.IntField);
+            Assert.AreEqual(jObject.ListField.Length, readJObject.ListField.Length);
+            Assert.AreEqual(jObject.StringField, readJObject.StringField);
+            Assert.IsNotNull(readJObject.ObjectField);
+            Assert.IsNull(readJObject.NullField);
+        }
+
+        #endregion
+
+        #region ReadBytes
+
+        [TestMethod]
+        public void ReadBytes_pass()
+        {
+            JObjectValidation jObject = new JObjectValidation
+            {
+                BooleanField = true,
+                ByteField = 1,
+                CharField = 'a',
+                DateField = "2016-08-24T18:30:32.2387069+00:00",
+                DoubleField = 10.5,
+                IntField = 10,
+                ListField = new object[2] { new { }, new { } },
+                ObjectField = new { },
+                StringField = "string",
+                NullField = null
+            };
+            byte[] jObjectBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(jObject));
+            byte[] length = Encoding.UTF8.GetBytes(jObjectBytes.Length.ToString().PadLeft(8));
+
+            Stream stream = new MemoryStream();
+            stream.Write(length, 0, 8);
+            stream.Write(jObjectBytes, 0, jObjectBytes.Length);
+            stream.Position = 0;
+
+            IJsonStream jsonStream = new JsonStream(stream);
+            JObjectValidation readJObject = JsonConvert.DeserializeObject<JObjectValidation>(Encoding.UTF8.GetString(jsonStream.ReadBytes()));
+            Assert.AreEqual(jObject.BooleanField, readJObject.BooleanField);
+            Assert.AreEqual(jObject.ByteField, readJObject.ByteField);
+            Assert.AreEqual(jObject.CharField, readJObject.CharField);
+            Assert.AreEqual(jObject.DateField, readJObject.DateField);
+            Assert.AreEqual(jObject.DoubleField, readJObject.DoubleField);
+            Assert.AreEqual(jObject.IntField, readJObject.IntField);
+            Assert.AreEqual(jObject.ListField.Length, readJObject.ListField.Length);
+            Assert.AreEqual(jObject.StringField, readJObject.StringField);
+            Assert.IsNotNull(readJObject.ObjectField);
+            Assert.IsNull(readJObject.NullField);
+        }
+
+        #endregion
+
+        #region ReadString
+
+        [TestMethod]
+        public void ReadString_pass()
+        {
+            JObjectValidation jObject = new JObjectValidation
+            {
+                BooleanField = true,
+                ByteField = 1,
+                CharField = 'a',
+                DateField = "2016-08-24T18:30:32.2387069+00:00",
+                DoubleField = 10.5,
+                IntField = 10,
+                ListField = new object[2] { new { }, new { } },
+                ObjectField = new { },
+                StringField = "string",
+                NullField = null
+            };
+            byte[] jObjectBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(jObject));
+            byte[] length = Encoding.UTF8.GetBytes(jObjectBytes.Length.ToString().PadLeft(8));
+
+            Stream stream = new MemoryStream();
+            stream.Write(length, 0, 8);
+            stream.Write(jObjectBytes, 0, jObjectBytes.Length);
+            stream.Position = 0;
+
+            IJsonStream jsonStream = new JsonStream(stream);
+            JObjectValidation readJObject = JsonConvert.DeserializeObject<JObjectValidation>(jsonStream.ReadString());
+            Assert.AreEqual(jObject.BooleanField, readJObject.BooleanField);
+            Assert.AreEqual(jObject.ByteField, readJObject.ByteField);
+            Assert.AreEqual(jObject.CharField, readJObject.CharField);
+            Assert.AreEqual(jObject.DateField, readJObject.DateField);
+            Assert.AreEqual(jObject.DoubleField, readJObject.DoubleField);
+            Assert.AreEqual(jObject.IntField, readJObject.IntField);
+            Assert.AreEqual(jObject.ListField.Length, readJObject.ListField.Length);
+            Assert.AreEqual(jObject.StringField, readJObject.StringField);
+            Assert.IsNotNull(readJObject.ObjectField);
+            Assert.IsNull(readJObject.NullField);
         }
 
         #endregion
