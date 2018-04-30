@@ -15,7 +15,8 @@
     <RepositoryUrl>https://github.com/stone-payments/json-stream.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>json, stream, jsonstream, filestream</PackageTags>
-    <PackageReleaseNotes>First release.</PackageReleaseNotes>
+    <PackageReleaseNotes>Increasing performance in almost 500%.</PackageReleaseNotes>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
