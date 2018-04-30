@@ -76,14 +76,14 @@ using (IJsonStream readJsonStream = new JsonStream(Modes.ReadOnly, "objects.json
 
 ```C#
 
-	IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
-	IPEndPoint remoteEP = new IPEndPoint(ipAddress, 11000);
-	Socket socket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-	
-	NetworkStream networkStream = new NetworkStream(socket);
-	using (IJsonStream jsonStream = new JsonStream(networkStream))
-	{
-		jsonStream.WriteObjectAsync(human);
-	}
+IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
+IPEndPoint remoteEP = new IPEndPoint(ipAddress, 11000);
+Socket socket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+
+NetworkStream networkStream = new NetworkStream(socket);
+using (IJsonStream jsonStream = new JsonStream(networkStream))
+{
+	jsonStream.WriteObjectAsync(human);
+}
 
 ```
