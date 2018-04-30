@@ -51,7 +51,7 @@ namespace StoneCo.Utils.IO
         /// Returns a JObject and move to the next document.
         /// </summary>
         /// <returns>The JObject.</returns>
-        Task<JObject> ReadJsonAsync();
+        Task<JObject> ReadJObjectAsync();
 
         /// <summary>
         /// Returns a JToken and move to the next document.

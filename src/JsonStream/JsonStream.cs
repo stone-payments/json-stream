@@ -373,7 +373,7 @@ namespace StoneCo.Utils.IO
         /// <returns>The JArray.</returns>
         public JArray ReadJArray()
         {
-            return ReadJArrayAsync().GetAwaiter().GetResult();
+            return ReadObject<JArray>();
         }
 
         /// <summary>
@@ -391,14 +391,14 @@ namespace StoneCo.Utils.IO
         /// <returns>The JObject.</returns>
         public JObject ReadJObject()
         {
-            return ReadJsonAsync().GetAwaiter().GetResult();
+            return ReadObject<JObject>();
         }
 
         /// <summary>
         /// Returns a JObject and move to the next document.
         /// </summary>
         /// <returns>The JObject.</returns>
-        public async Task<JObject> ReadJsonAsync()
+        public async Task<JObject> ReadJObjectAsync()
         {
             return await ReadObjectAsync<JObject>();
         }
@@ -409,7 +409,7 @@ namespace StoneCo.Utils.IO
         /// <returns>The JToken.</returns>
         public JToken ReadJToken()
         {
-            return ReadJTokenAsync().GetAwaiter().GetResult();
+            return ReadObject<JToken>();
         }
 
         /// <summary>
@@ -428,7 +428,12 @@ namespace StoneCo.Utils.IO
         /// <returns>The T instance.</returns>
         public T ReadObject<T>()
         {
-            return ReadObjectAsync<T>().GetAwaiter().GetResult();
+            string strJson = ReadString();
+            if (strJson == null)
+            {
+                return default(T);
+            }
+            return JsonConvert.DeserializeObject<T>(strJson);
         }
 
         /// <summary>
@@ -452,7 +457,12 @@ namespace StoneCo.Utils.IO
         /// <returns>The string of the document.</returns>
         public string ReadString()
         {
-            return ReadStringAsync().GetAwaiter().GetResult();
+            byte[] readBytes = ReadBytes();
+            if (readBytes == null)
+            {
+                return null;
+            }
+            return Encoding.UTF8.GetString(readBytes);
         }
 
         /// <summary>
