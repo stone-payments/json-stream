@@ -29,6 +29,12 @@ namespace StoneCo.Utils.IO
 
         #endregion
 
+        #region Private
+
+        private Object lockObject = new Object();
+
+        #endregion
+
         #region Protected fields
 
         /// <summary>
@@ -306,22 +312,25 @@ namespace StoneCo.Utils.IO
                 throw new ForbiddenOperationException("Can't read in WriteOnly mode.");
             }
 
-            int nextDocumentSize = GetNextDocumentSize();
-
-            if (nextDocumentSize == 0)
+            lock (lockObject)
             {
-                return null;
+                int nextDocumentSize = GetNextDocumentSize();
+
+                if (nextDocumentSize == 0)
+                {
+                    return null;
+                }
+
+                byte[] documentBytes = new byte[nextDocumentSize];
+                int readBytes = this.BinaryReader.Read(documentBytes, 0, nextDocumentSize);
+
+                if (readBytes != nextDocumentSize)
+                {
+                    throw new InvalidJsonDocumentException($"Cant't read all bytes of the json document at position {Position}.", this.Position);
+                }
+
+                return documentBytes;
             }
-
-            byte[] documentBytes = new byte[nextDocumentSize];            
-            int readBytes = this.BinaryReader.Read(documentBytes, 0, nextDocumentSize);
-
-            if (readBytes != nextDocumentSize)
-            {
-                throw new InvalidJsonDocumentException($"Cant't read all bytes of the json document at position {Position}.", this.Position);
-            }
-
-            return documentBytes;
         }
 
         /// <summary>
@@ -476,10 +485,13 @@ namespace StoneCo.Utils.IO
                 throw new ForbiddenOperationException("Can't write in ReadOnly mode.");
             }
 
-            byte[] lengthDescriptor = PrepareWrite(bytes, validate);
+            lock (lockObject)
+            {
+                byte[] lengthDescriptor = PrepareWrite(bytes, validate);
 
-            this.BinaryWriter.Write(lengthDescriptor, 0, lengthDescriptor.Length);
-            this.BinaryWriter.Write(bytes, 0, bytes.Length);
+                this.BinaryWriter.Write(lengthDescriptor, 0, lengthDescriptor.Length);
+                this.BinaryWriter.Write(bytes, 0, bytes.Length);
+            }
         }
 
         /// <summary>
