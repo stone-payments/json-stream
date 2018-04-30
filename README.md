@@ -51,7 +51,7 @@ See the arguments used in the FileStream constructor depending of the choosed mo
 
 ### Default Values
 
-#### DEFAULT\_BUFFER\_SIZE = 524288 bytes
+#### DEFAULT\_BUFFER\_SIZE = 512 Kbytes
 The buffer size passed to the FileStream constructor.
 
 
