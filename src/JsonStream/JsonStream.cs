@@ -535,7 +535,8 @@ namespace StoneCo.Utils.IO
         /// <param name="instance">The instance of T to write.</param>
         public void WriteObject(object instance)
         {
-            WriteObjectAsync(instance).GetAwaiter().GetResult();
+            string strObject = JsonConvert.SerializeObject(instance);
+            WriteString(strObject, false);
         }
 
         /// <summary>
