@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -28,11 +29,11 @@ namespace StoneCo.Utils.IO
             Settings = new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore,
-                DateParseHandling = DateParseHandling.None
+                DateParseHandling = DateParseHandling.None,
             };
+            Settings.Converters.Add(new StringEnumConverter());
 
             Serializer = JsonSerializer.Create(Settings);
         }
-
     }
 }
