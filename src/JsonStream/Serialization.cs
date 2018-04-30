@@ -29,7 +29,7 @@ namespace StoneCo.Utils.IO
             Settings = new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore,
-                DateParseHandling = DateParseHandling.None,
+                DateParseHandling = DateParseHandling.None
             };
             Settings.Converters.Add(new StringEnumConverter());
 
