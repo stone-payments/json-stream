@@ -15,7 +15,7 @@ namespace StoneCo.Utils.IO
         /// <summary>
         /// The pointer position in the Stream.
         /// </summary>
-        long Position { get; }
+        long Position { get; set; }
 
         /// <summary>
         /// Returns the bytes of the document and move to the next document.
