@@ -20,8 +20,7 @@ When the Dispose method is called, the JsonStream calls the Dispose method of th
 
 ## Examples
 
-### Writing an object
-
+### Base code
 
 ```C#
 
@@ -39,6 +38,13 @@ enum Gender
 	Male,
 	Female
 }
+
+```
+
+### Writing an object
+
+
+```C#
 
 // Choose the WriteOnly mode and inform the file path.
 using (IJsonStream writeJsonStream = new JsonStream(Modes.WriteOnly, "objects.json"))
