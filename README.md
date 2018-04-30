@@ -43,3 +43,20 @@ using (IJsonStream writeJsonStream = new JsonStream(Modes.WriteOnly, "objects.js
 }
 
 ```
+
+### Reading the whole file
+
+```C#
+
+// Just inform the mode and the file name.
+using (IJsonStream readJsonStream = new JsonStream(Modes.ReadOnly, "objects.json"))
+{
+	Human human;
+	while ((human = readJsonStream.ReadObject<Human>()) != null)
+	{
+		Console.WriteLine($"Name {human.Name}, Gender: {human.Gender}, Age: {human.Age}");
+	}	
+}
+
+
+```
