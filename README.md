@@ -8,8 +8,7 @@ If you are reading or writing a file in sequential mode (one object after anothe
 
 If you are reading or writing another kind of stream like a MemoryStream or NetworkStream, you can use the other constructor passing this stream.
 
-## Important information
-If you used one of the optimized constructors to instantiate the JsonStream, you can't use the async methods.
+**If you used one of the optimized constructors to instantiate the JsonStream, you can't use the async methods.**
  
 
 ## How it works?
@@ -74,3 +73,17 @@ using (IJsonStream readJsonStream = new JsonStream(Modes.ReadOnly, "objects.json
 ```
 
 ### Using the constructor receiving the stream
+
+```C#
+
+	IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
+	IPEndPoint remoteEP = new IPEndPoint(ipAddress, 11000);
+	Socket socket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+	
+	NetworkStream networkStream = new NetworkStream(socket);
+	using (IJsonStream jsonStream = new JsonStream(networkStream))
+	{
+		jsonStream.WriteObjectAsync(human);
+	}
+
+```
