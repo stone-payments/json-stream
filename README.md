@@ -15,31 +15,31 @@ If you are reading or writing another kind of stream like a MemoryStream or Netw
 
 ```C#
 
-	class Human
-	{
-		public int Age { get; set; }
-		
-		public string Name { get; set; }
-		
-		public Gender Gender { get; set; }
-	}
+class Human
+{
+	public int Age { get; set; }
 	
-	enum Gender {
-		Male,
-		Female
-	}
+	public string Name { get; set; }
+	
+	public Gender Gender { get; set; }
+}
 
-	// Choose the WriteOnly mode and inform the file name.
-	using (IJsonStream writeJsonStream = new JsonStream(Modes.WriteOnly, "objects.json"))
+enum Gender {
+	Male,
+	Female
+}
+
+// Choose the WriteOnly mode and inform the file name.
+using (IJsonStream writeJsonStream = new JsonStream(Modes.WriteOnly, "objects.json"))
+{
+	Human human = new Human
 	{
-		Human human = new Human
-		{
-			Age = 35,
-			Gender = Gender.Male,
-			Name = "My name"
-		};
-		
-		writeJsonStream.WriteObject(human);                    
-	}
+		Age = 35,
+		Gender = Gender.Male,
+		Name = "My name"
+	};
+	
+	writeJsonStream.WriteObject(human);                    
+}
 
 ```
