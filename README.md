@@ -1,5 +1,5 @@
 # Json Stream
-JsonStream is a thread-safe class library to make easy to read and to write json structures from/to a stream.
+JsonStream is a thread-safe dotNet Standard Class Library to make easy to read and to write json structures from/to a stream.
 
 ## Introduction
 This class library was built to have a high performance when is reading or writing sequential files.
@@ -93,3 +93,6 @@ using (IJsonStream jsonStream = new JsonStream(networkStream))
 }
 
 ```
+
+## License
+This library is distributed under the MIT license.
