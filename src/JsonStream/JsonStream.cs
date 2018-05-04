@@ -116,7 +116,7 @@ namespace StoneCo.Utils.IO
             {
                 fileMode = FileMode.Append;
                 fileAccess = FileAccess.Write;
-                fileShare = FileShare.Read;
+                fileShare = FileShare.ReadWrite;
                 fileOptions = FileOptions.SequentialScan;
             }
             else if(Mode == Modes.ReadOnly)

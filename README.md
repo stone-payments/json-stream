@@ -40,7 +40,7 @@ See the arguments used in the FileStream constructor depending of the choosed mo
 #### WriteOnly
 * **FileMode** - Append
 * **FileAccess** - Write
-* **FileShare** - Read
+* **FileShare** - ReadWrite
 * **FileOptions** - SequentialScan
 
 #### ReadAndWrite

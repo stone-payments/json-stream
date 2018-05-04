@@ -16,7 +16,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>json, stream, csharp, dotnet, dotnetstandard, jsonstream, filestream, jsonfile</PackageTags>
     <PackageReleaseNotes>Publishing as OpenSource.</PackageReleaseNotes>
-    <Version>1.0.6</Version>
+    <Version>1.0.7</Version>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
