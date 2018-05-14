@@ -18,6 +18,16 @@ namespace StoneCo.Utils.IO
         long Position { get; set; }
 
         /// <summary>
+        /// Writes the in memory buffer to disk.
+        /// </summary>
+        void Flush();
+
+        /// <summary>
+        /// Writes the in memory buffer to disk asynchronously.
+        /// </summary>
+        Task FlushAsync();
+
+        /// <summary>
         /// Returns the bytes of the document and move to the next document.
         /// </summary>
         /// <returns>The bytes of the document.</returns>

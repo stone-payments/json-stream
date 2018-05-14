@@ -299,6 +299,16 @@ namespace StoneCo.Utils.IO
 
         #region Public methods
 
+        /// <summary>
+        /// Writes the in memory buffer to disk.
+        /// </summary>
+        public void Flush() => Stream.Flush();
+
+        /// <summary>
+        /// Writes the in memory buffer to disk asynchronously.
+        /// </summary>
+        public async Task FlushAsync() => await Stream.FlushAsync();
+
         #region ReadMethods
 
         /// <summary>
