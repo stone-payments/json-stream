@@ -15,8 +15,8 @@
     <RepositoryUrl>https://github.com/stone-payments/json-stream.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>json, stream, csharp, dotnet, dotnetstandard, jsonstream, filestream, jsonfile</PackageTags>
-    <PackageReleaseNotes>Publishing as OpenSource.</PackageReleaseNotes>
-    <Version>1.0.7</Version>
+    <PackageReleaseNotes>Implementing Flush and FlushAsync methods.</PackageReleaseNotes>
+    <Version>1.0.8</Version>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
