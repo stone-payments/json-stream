@@ -143,6 +143,11 @@ namespace StoneCo.Utils.IO
 
         #region IDisposable Support
 
+        ~JsonStream()
+        {
+            Dispose(false);
+        }
+
         private bool disposedValue = false; // To detect redundant calls
 
         /// <summary>
@@ -155,7 +160,9 @@ namespace StoneCo.Utils.IO
             {
                 if (disposing)
                 {
+                    this.Stream.Flush();
                     this.Stream.Dispose();
+                    this.Stream = null;
                 }
 
                 disposedValue = true;
@@ -168,6 +175,7 @@ namespace StoneCo.Utils.IO
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         #endregion
