@@ -519,6 +519,10 @@ namespace StoneCo.Utils.IO
 
                 this.BinaryWriter.Write(lengthDescriptor, 0, lengthDescriptor.Length);
                 this.BinaryWriter.Write(bytes, 0, bytes.Length);
+
+                // Forcing unallocating memory.
+                lengthDescriptor = null;
+                bytes = null;
             }
         }
 
@@ -543,6 +547,10 @@ namespace StoneCo.Utils.IO
 
             await Stream.WriteAsync(lengthDescriptor, 0, lengthDescriptor.Length);
             await Stream.WriteAsync(bytes, 0, bytes.Length);
+
+            // Forcing unallocating memory.
+            lengthDescriptor = null;
+            bytes = null;
         }
 
 
