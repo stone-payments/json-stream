@@ -9,7 +9,7 @@
 - **SUBMETA** todas as mudanças de códigos via pull requests (PRs) ao invés de um commit direto. PRs serão revisados e potencialmente "mergidos" (merged) pelos mantenedores do repositório depois de uma revisão de um colega que inclua pelo menos um mantenedor.
 - **ASSEGURE-SE** que cada commit "builde" (build) com sucesso. O PR inteiro deve passar em todos os testes do sistema de Integração Contínua (Continuous Integration, CI) antes de ser "mergido" (merged).
 - **NÃO** misture mudanças independentes e não-relacionadas em um mesmo PR. Separe mudanças de produtos reais/códigos de teste de mudanças maiores de formatação de código/remoção de código morto. Separe ajustes não-relacionados em PRs separados, especialmente se eles estiverem em diferentes assemblies.
-- **ENDERECE** feedback de PR em um commit(s) adicional(is) ao invés de adicionar a commits existentes, e só dê rebase/squash neles quando necessário. Isso torna mais fácil para os revisores macompanharem mudanças. Se necessário, squashing deve ser administrada pelo merger usando a função "squash and merge", e só deve ser feita pelo contributor se lhe for requerido.
+- **ENDERECE** feedback de PR em um commit(s) adicional(is) ao invés de adicionar a commits existentes, e só dê rebase/squash neles quando necessário. Isso torna mais fácil para os revisores acompanharem mudanças. Se necessário, squashing deve ser administrada pelo merger usando a função "squash and merge", e só deve ser feita pelo contributor se lhe for requerido.
 
 ## O que fazer e o que não fazer
 
