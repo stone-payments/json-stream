@@ -29,9 +29,9 @@ namespace StoneCo.Utils.IO
 
         #endregion
 
-        #region Private
+        #region Private static field
 
-        private Object lockObject = new Object();
+        private static Object LockObject = new Object();
 
         #endregion
 
@@ -116,7 +116,7 @@ namespace StoneCo.Utils.IO
             {
                 fileMode = FileMode.Append;
                 fileAccess = FileAccess.Write;
-                fileShare = FileShare.Read;
+                fileShare = FileShare.ReadWrite;
                 fileOptions = FileOptions.SequentialScan;
             }
             else if(Mode == Modes.ReadOnly)
@@ -330,7 +330,7 @@ namespace StoneCo.Utils.IO
                 throw new ForbiddenOperationException("Can't read in WriteOnly mode.");
             }
 
-            lock (lockObject)
+            lock (LockObject)
             {
                 int nextDocumentSize = GetNextDocumentSize();
 
@@ -513,7 +513,7 @@ namespace StoneCo.Utils.IO
                 throw new ForbiddenOperationException("Can't write in ReadOnly mode.");
             }
 
-            lock (lockObject)
+            lock (LockObject)
             {
                 byte[] lengthDescriptor = PrepareWrite(bytes, validate);
 
