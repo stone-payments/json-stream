@@ -29,9 +29,9 @@ namespace StoneCo.Utils.IO
 
         #endregion
 
-        #region Private static field
+        #region Private field
 
-        private static Object LockObject = new Object();
+        private Object LockObject = new Object();
 
         #endregion
 
