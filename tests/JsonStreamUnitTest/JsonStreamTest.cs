@@ -10,6 +10,17 @@ using System.Text;
 
 namespace StoneCo.Utils.IO.JsonStreamUnitTest
 {
+    public enum Gender { Male, Female };
+
+    public class Human
+    {
+        public string Name { get; set; }
+
+        public int Age { get; set; }
+
+        public Gender Gender { get; set; }
+    }
+
     [TestClass]
     public class JsonStreamTest
     {
@@ -215,6 +226,47 @@ namespace StoneCo.Utils.IO.JsonStreamUnitTest
                 Assert.IsTrue(jsonStream.IsUsingOptimizedConstructor);
                 Assert.AreEqual(Modes.ReadAndWrite, jsonStream.Mode);
             }
+        }
+
+        #endregion
+
+        #region GetString
+
+        [TestMethod]
+        public void GetString()
+        {
+            Human human = new Human
+            {
+                Name = "Marcus",
+                Age = 35,
+                Gender = Gender.Male
+            };
+
+            string expectedString = "{\"Name\":\"Marcus\",\"Age\":35,\"Gender\":\"Male\"}";            
+            string humanString = JsonStream.GetString(human);            
+
+            Assert.AreEqual(expectedString, humanString);
+        }
+
+        #endregion
+
+        #region GetBytes
+
+        [TestMethod]
+        public void GetBytes()
+        {
+            Human human = new Human
+            {
+                Name = "Marcus",
+                Age = 35,
+                Gender = Gender.Male
+            };
+            string expectedString = "{\"Name\":\"Marcus\",\"Age\":35,\"Gender\":\"Male\"}";
+            byte[] expectedBytes = System.Text.Encoding.UTF8.GetBytes(expectedString);            
+            byte[] humanBytes = JsonStream.GetBytes(human);
+            string humanString = System.Text.Encoding.UTF8.GetString(humanBytes);
+
+            Assert.AreEqual(expectedString, humanString);
         }
 
         #endregion

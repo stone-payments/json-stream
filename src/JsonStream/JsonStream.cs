@@ -593,5 +593,29 @@ namespace StoneCo.Utils.IO
         #endregion
 
         #endregion
+
+        #region Static methods
+
+        /// <summary>
+        /// Serialize the object as string.
+        /// </summary>
+        /// <param name="obj">Objet to serialize.</param>
+        /// <returns>The serialized object.</returns>
+        public static string GetString(object obj)
+        {
+            return JsonConvert.SerializeObject(obj, Serialization.Settings);           
+        }
+
+        /// <summary>
+        /// Serialize th oebject as bytes.
+        /// </summary>
+        /// <param name="obj">Object to serialize.</param>
+        /// <returns>Tue serialized object.</returns>
+        public static byte[] GetBytes(object obj)
+        {            
+            return Encoding.UTF8.GetBytes(GetString(obj));
+        }
+
+        #endregion
     }
 }

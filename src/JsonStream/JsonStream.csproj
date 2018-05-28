@@ -15,8 +15,8 @@
     <RepositoryUrl>https://github.com/stone-payments/json-stream.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>json, stream, csharp, dotnet, dotnetstandard, jsonstream, filestream, jsonfile</PackageTags>
-    <PackageReleaseNotes>Performance improvements.</PackageReleaseNotes>
-    <Version>1.0.14</Version>
+    <PackageReleaseNotes>Adding GetString and GetBytes static methods.</PackageReleaseNotes>
+    <Version>1.0.15</Version>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
