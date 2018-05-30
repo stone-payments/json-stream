@@ -25,13 +25,13 @@ namespace StoneCo.Utils.IO
         /// <summary>
         /// The default buffer size to pass as argument on creating a FileStream.
         /// </summary>
-        public const int DEFAULT_BUFFER_SIZE = 2 << 18;
+        public const int DEFAULT_BUFFER_SIZE = 4096;
 
         #endregion
 
         #region Private field
 
-        private Object LockObject = new Object();
+        private ReaderWriterLockSlim ReadWriteLockSlim = new ReaderWriterLockSlim();
 
         #endregion
 
@@ -134,8 +134,8 @@ namespace StoneCo.Utils.IO
                 fileOptions = FileOptions.RandomAccess;
             }           
 
-            FileStream stream = new FileStream(filePath, fileMode, fileAccess, fileShare, bufferSize, fileOptions);
-            this.Initialize(stream, documentSizeLengthInBytes);
+            FileStream stream = new FileStream(filePath, fileMode, fileAccess, fileShare, bufferSize, fileOptions);            
+            this.Initialize(stream, documentSizeLengthInBytes);            
             this.IsUsingOptimizedConstructor = true;
         }
 
@@ -310,12 +310,26 @@ namespace StoneCo.Utils.IO
         /// <summary>
         /// Writes the in memory buffer to disk.
         /// </summary>
-        public void Flush() => Stream.Flush();
+        public void Flush()
+        {
+            if (IsUsingOptimizedConstructor)
+            {
+                this.BinaryWriter.Flush();
+            }
+        }
 
         /// <summary>
         /// Writes the in memory buffer to disk asynchronously.
         /// </summary>
-        public async Task FlushAsync() => await Stream.FlushAsync();
+        public async Task FlushAsync()
+        {
+            if (this.IsUsingOptimizedConstructor)
+            {
+                throw new ForbiddenOperationException("Do not call any async method when using optimized constructor.");
+            }
+            
+            await Stream.FlushAsync();
+        }
 
         #region ReadMethods
 
@@ -330,25 +344,25 @@ namespace StoneCo.Utils.IO
                 throw new ForbiddenOperationException("Can't read in WriteOnly mode.");
             }
 
-            lock (LockObject)
+            ReadWriteLockSlim.EnterReadLock();
+            int nextDocumentSize = GetNextDocumentSize();
+
+            if (nextDocumentSize == 0)
             {
-                int nextDocumentSize = GetNextDocumentSize();
-
-                if (nextDocumentSize == 0)
-                {
-                    return null;
-                }
-
-                byte[] documentBytes = new byte[nextDocumentSize];
-                int readBytes = this.BinaryReader.Read(documentBytes, 0, nextDocumentSize);
-
-                if (readBytes != nextDocumentSize)
-                {
-                    throw new InvalidJsonDocumentException($"Cant't read all bytes of the json document at position {Position}.", this.Position);
-                }
-
-                return documentBytes;
+                return null;
             }
+
+            byte[] documentBytes = new byte[nextDocumentSize];
+            int readBytes = this.BinaryReader.Read(documentBytes, 0, nextDocumentSize);
+            ReadWriteLockSlim.ExitReadLock();
+
+            if (readBytes != nextDocumentSize)
+            {
+                throw new InvalidJsonDocumentException($"Cant't read all bytes of the json document at position {Position}.", this.Position);
+            }
+
+            return documentBytes;
+            
         }
 
         /// <summary>
@@ -512,14 +526,13 @@ namespace StoneCo.Utils.IO
             {
                 throw new ForbiddenOperationException("Can't write in ReadOnly mode.");
             }
-
-            lock (LockObject)
-            {
-                byte[] lengthDescriptor = PrepareWrite(bytes, validate);
-
-                this.BinaryWriter.Write(lengthDescriptor, 0, lengthDescriptor.Length);
-                this.BinaryWriter.Write(bytes, 0, bytes.Length);
-            }
+            
+            byte[] lengthDescriptor = PrepareWrite(bytes, validate);
+            
+            ReadWriteLockSlim.EnterWriteLock();
+            this.BinaryWriter.Write(lengthDescriptor, 0, lengthDescriptor.Length);
+            this.BinaryWriter.Write(bytes, 0, bytes.Length);            
+            ReadWriteLockSlim.ExitWriteLock();            
         }
 
         /// <summary>
@@ -540,9 +553,11 @@ namespace StoneCo.Utils.IO
             }
             
             byte[] lengthDescriptor = PrepareWrite(bytes, validate);
-
+            
+            ReadWriteLockSlim.EnterWriteLock();
             await Stream.WriteAsync(lengthDescriptor, 0, lengthDescriptor.Length);
-            await Stream.WriteAsync(bytes, 0, bytes.Length);
+            await Stream.WriteAsync(bytes, 0, bytes.Length);            
+            ReadWriteLockSlim.ExitWriteLock();
         }
 
 
