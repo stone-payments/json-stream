@@ -15,8 +15,8 @@
     <RepositoryUrl>https://github.com/stone-payments/json-stream.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>json, stream, csharp, dotnet, dotnetstandard, jsonstream, filestream, jsonfile</PackageTags>
-    <PackageReleaseNotes>Adding GetString and GetBytes static methods.</PackageReleaseNotes>
-    <Version>1.0.15</Version>
+    <PackageReleaseNotes>Changing DEFAULT_BUFFER_SIZE to 4096 bytes and using ReaderWriterLockSlim semaphore.</PackageReleaseNotes>
+    <Version>1.0.16</Version>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
