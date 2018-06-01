@@ -40,7 +40,7 @@ See the arguments used in the FileStream constructor depending of the choosed mo
 #### WriteOnly
 * **FileMode** - Append
 * **FileAccess** - Write
-* **FileShare** - ReadWrite
+* **FileShare** - Read
 * **FileOptions** - SequentialScan
 
 #### ReadAndWrite
@@ -51,7 +51,7 @@ See the arguments used in the FileStream constructor depending of the choosed mo
 
 ### Default Values
 
-#### DEFAULT\_BUFFER\_SIZE = 512 Kbytes
+#### DEFAULT\_BUFFER\_SIZE = 4096 bytes
 The buffer size passed to the FileStream constructor.
 
 
