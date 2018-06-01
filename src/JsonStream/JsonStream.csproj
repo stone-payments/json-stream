@@ -16,7 +16,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>json, stream, csharp, dotnet, dotnetstandard, jsonstream, filestream, jsonfile</PackageTags>
     <PackageReleaseNotes>Changing DEFAULT_BUFFER_SIZE to 4096 bytes and using ReaderWriterLockSlim semaphore.</PackageReleaseNotes>
-    <Version>1.0.16</Version>
+    <Version>1.0.17</Version>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
